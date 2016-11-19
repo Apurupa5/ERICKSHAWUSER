@@ -1,0 +1,80 @@
+<LinearLayout
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical">
+<LinearLayout
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content">
+        <EditText
+    android:layout_width="272dp"
+    android:layout_height="wrap_content"
+            android:hint="Enter destination address"
+            android:textColorHint="#817f7f"
+    android:id="@+id/MapsDestEditText"/>
+    <Button
+        android:layout_width="111dp"
+        android:layout_height="wrap_content"
+        android:text="RIDE NOW"
+        android:background="#f57846"
+        android:id="@+id/MapsRideButton"
+        android:layout_gravity="right"
+        style="?android:attr/buttonStyleSmall"
+        android:onClick="onRideClick" />
+</LinearLayout>
+    <fragment xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:map="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/map"
+    android:name="com.google.android.gms.maps.SupportMapFragment"
+    android:layout_width="match_parent"
+    android:layout_height="395dp"
+    tools:context="com.iiitd.apurupa.mcproject.bookmyrickshaw.TrialMapsActivity" />
+
+
+
+    <LinearLayout
+        android:layout_width="323dp"
+        android:layout_height="35dp"
+        android:weightSum="1">
+
+        <Button
+
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:text="Estimate"
+            android:id="@+id/estimateButton"
+            android:layout_gravity="right"
+            android:background="#f57846"
+            android:onClick="estimate" />
+
+        <TextView
+            android:layout_width="100dp"
+            android:layout_height="50dp"
+            android:text=""
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:id="@+id/estimatetextView"
+            android:layout_weight="0.81" />
+
+    </LinearLayout>
+
+    <Button
+
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:text="Ride Now"
+        android:id="@+id/rideNowButton"
+        android:background="#f57846"
+         />
+
+    <LinearLayout
+        android:layout_width="323dp"
+        android:layout_height="35dp"
+        android:weightSum="1">
+
+        ]
+    </LinearLayout>
+
+</LinearLayout>

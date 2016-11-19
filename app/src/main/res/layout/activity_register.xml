@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    android:background="@drawable/back"
+    tools:context="com.iiitd.apurupa.mcproject.bookmyrickshaw.RegisterActivity">
+    <EditText
+        android:layout_width="wrap_content"
+        android:layout_height="50dp"
+        android:id="@+id/RegFullnameEditText"
+        android:hint="Enter your Fullname"
+        android:gravity="center_horizontal"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:textColorHint="#817f7f"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_marginTop="53dp"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true" />
+    <EditText
+        android:layout_width="wrap_content"
+        android:layout_height="50dp"
+
+        android:id="@+id/RegEmailEditText"
+        android:hint="Enter Your Email ID"
+        android:gravity="center_horizontal"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:textColorHint="#817f7f"
+        android:layout_below="@+id/RegFullnameEditText"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_alignRight="@+id/RegFullnameEditText"
+        android:layout_alignEnd="@+id/RegFullnameEditText" />
+
+    <EditText
+        android:layout_width="wrap_content"
+        android:layout_height="50dp"
+        android:id="@+id/RegPasswordEditText"
+        android:hint="Enter Your Password"
+        android:gravity="center_horizontal"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:textColorHint="#817f7f"
+        android:layout_below="@+id/RegEmailEditText"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true" />
+
+    <EditText
+        android:layout_width="wrap_content"
+        android:layout_height="50dp"
+        android:id="@+id/RegConfirmPasswordEditText"
+        android:hint="Confirm Your Password"
+        android:gravity="center_horizontal"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:textColorHint="#817f7f"
+        android:layout_below="@+id/RegPasswordEditText"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true" />
+    <EditText
+        android:layout_width="wrap_content"
+        android:layout_height="50dp"
+        android:id="@+id/RegPhonenoEditText"
+        android:hint="Enter your Phone no"
+        android:gravity="center_horizontal"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:textColorHint="#817f7f"
+        android:layout_below="@+id/RegConfirmPasswordEditText"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Register New Account"
+        android:background="#f57846"
+        android:id="@+id/registeraccButton"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="51dp"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_alignRight="@+id/RegAlloginButton"
+        android:layout_alignEnd="@+id/RegAlloginButton" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Already Have an Account? Login Here"
+        android:id="@+id/RegAlloginButton"
+        style="?android:attr/borderlessButtonStyle"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Create an Account"
+        android:id="@+id/createaccounttextView"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true" />
+
+    <TextView
+        android:layout_width="100dp"
+        android:layout_height="35dp"
+        android:text="You are a "
+        android:layout_marginTop="10dp"
+        android:id="@+id/RegUserTypeTextView"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:layout_below="@+id/RegPhonenoEditText"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
+
+    <Spinner
+        android:layout_width="100dp"
+        android:layout_height="35dp"
+        android:id="@+id/RegUserTypeSpinner"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:textSize="20dp"
+        android:layout_alignTop="@+id/RegUserTypeTextView"
+        android:layout_toRightOf="@+id/RegUserTypeTextView"
+        android:layout_toEndOf="@+id/RegUserTypeTextView" />
+
+
+    <EditText
+        android:layout_width="wrap_content"
+        android:layout_height="50dp"
+        android:id="@+id/RegLicenceEditText"
+        android:hint="Enter your Licence no"
+        android:gravity="center_horizontal"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:textColorHint="#817f7f"
+        android:visibility="invisible"
+        android:layout_below="@+id/RegUserTypeTextView"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        />
+
+</RelativeLayout>
