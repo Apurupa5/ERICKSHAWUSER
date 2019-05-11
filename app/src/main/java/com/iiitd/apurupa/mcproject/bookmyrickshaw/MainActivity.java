@@ -5,8 +5,13 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
+import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Build;
+import android.support.annotation.NonNull;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -56,9 +61,18 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        serviceintent=new Intent(this, TimeService.class);
-        startService(serviceintent);
+
+//
+//      if (!runtime_permissions())
+//          enable_service();
+
         init();
+    }
+    //Check For Network Connectivity
+    private boolean isNetworkConnected() {
+        ConnectivityManager cm = (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
+
+        return cm.getActiveNetworkInfo() != null;
     }
 
     private void init() {
@@ -68,6 +82,36 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         mSignUpButton=(Button)findViewById(R.id.signUpButton);
         mLoginButton.setOnClickListener(this);
         mSignUpButton.setOnClickListener(this);
+    }
+//Enabling a service
+    private void enable_service() {
+
+        serviceintent=new Intent(this, TimeService.class);
+        startService(serviceintent);
+
+    }
+
+    //Checking whether we have run time permissions
+    private boolean runtime_permissions() {
+        if(Build.VERSION.SDK_INT >= 23 && ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED){
+
+            requestPermissions(new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION, android.Manifest.permission.ACCESS_COARSE_LOCATION},100);
+
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if(requestCode == 100){
+            if( grantResults[0] == PackageManager.PERMISSION_GRANTED && grantResults[1] == PackageManager.PERMISSION_GRANTED){
+                enable_service();
+            }else {
+                runtime_permissions();
+            }
+        }
     }
 
     @Override
@@ -82,8 +126,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     toast.showmessage(getApplicationContext(),"Please Fill All The fields");
                     break;
                 }
-               new LoginCheck().execute(email,password);
-
+                if(isNetworkConnected()) {
+                    //Authenticate username and password
+                    new LoginCheck().execute(email, password);
+                }
+                else
+                {
+                    toast.showmessage(getApplicationContext(),"No Internet Connectivity");
+                }
                 break;
             case R.id.signUpButton:
 
@@ -95,9 +145,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        Log.d("In Main Activity","Service"); }
+        Log.d("In Main Activity","Service");
+        //stopService(serviceintent);
+    }
 
-
+//Backend Method to authenticate the user
     class LoginCheck extends AsyncTask<String, String, String> {
 
         /**
@@ -140,6 +192,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 conn.setDoInput(true);
                 conn.setDoOutput(true);
             } catch (MalformedURLException e) {
+
                 e.printStackTrace();
             } catch (IOException e) {
                 e.printStackTrace();
@@ -195,6 +248,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
                                     SharedPreferences.Editor edt = preferences.edit();
                                     edt.putString("email", email);
+                                    edt.putBoolean("isloggedin",true);
                                     edt.apply();
                                     edt.commit();
 

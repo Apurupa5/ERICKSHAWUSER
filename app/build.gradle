@@ -19,18 +19,18 @@ android {
     }
 }
 
-dependencies {
+dependencies
+{
     compile fileTree(dir: 'libs', include: ['*.jar'])
     testCompile 'junit:junit:4.12'
-
-
-
     compile 'com.android.support:appcompat-v7:24.1.1'
     compile 'com.google.http-client:google-http-client-android:+'
     compile 'com.google.api-client:google-api-client-android:+'
     compile 'com.google.api-client:google-api-client-gson:+'
     compile 'com.google.code.gson:gson:2.2.4'
     compile 'com.googlecode.json-simple:json-simple:1.1'
-    compile 'com.android.support:design:24.1.1'
     compile 'com.google.android.gms:play-services:9.4.0'
+    compile 'com.android.support:design:24.1.1'
+
+
 }

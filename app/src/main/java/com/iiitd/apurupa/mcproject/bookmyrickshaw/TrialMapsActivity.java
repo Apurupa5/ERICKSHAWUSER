@@ -1,19 +1,28 @@
 package com.iiitd.apurupa.mcproject.bookmyrickshaw;
 
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
+import android.net.ConnectivityManager;
 import android.os.AsyncTask;
 import android.os.Handler;
+import android.support.design.widget.NavigationView;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBarActivity;
+import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -53,6 +62,7 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.sql.Time;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Timer;
@@ -60,7 +70,7 @@ import java.util.TimerTask;
 
 import javax.net.ssl.HttpsURLConnection;
 
-public class TrialMapsActivity extends FragmentActivity implements OnMapReadyCallback {
+public class TrialMapsActivity extends AppCompatActivity implements OnMapReadyCallback {
 
     private GoogleMap mMap;
     private Button msearchButton;
@@ -71,12 +81,23 @@ public class TrialMapsActivity extends FragmentActivity implements OnMapReadyCal
     private Intent serviceintent;
     public static final String mypreference = "mypref";
     float distance=0;
-    private ProgressDialog pDialog;
+    private ProgressDialog pDialog,pDialog1,pDialog2;
     JSONParser jsonParser = new JSONParser();
     private ShowMessage toast=new ShowMessage();
+    private Handler mHandler = new Handler();
     int PLACE_AUTOCOMPLETE_REQUEST_CODE = 1;
+    int TimeCounter=0;
     private static String url_get_driverlocation = "http://192.168.58.165/mc/available.php";
     private static String url_push_notification="http://192.168.58.165/mc/push_notification.php";
+    private static String url_get_ridestatus="http://192.168.58.165/mc/ride_status.php";
+    private static String url_check_journeystatus="http://192.168.58.165/mc/journey_status.php";
+    final Timer t=new Timer();
+    private boolean timer_status=true;
+    String accepted_status="0";
+    private DrawerLayout mdrawerlayout;
+    private ActionBarDrawerToggle mactiontoggle;
+    private String journey_status;
+    private NavigationView mnavigationview;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -87,25 +108,150 @@ public class TrialMapsActivity extends FragmentActivity implements OnMapReadyCal
         mapFragment.getMapAsync(this);
         mestimateTextView= (TextView)findViewById(R.id.estimatetextView);
         mestimateButton=(Button)findViewById(R.id.estimateButton);
+        mdrawerlayout=(DrawerLayout)findViewById(R.id.drawerlayout);
+        mnavigationview=(NavigationView)findViewById(R.id.navigationview);
+        mactiontoggle=new ActionBarDrawerToggle(this,mdrawerlayout,R.string.open,R.string.close);
+        mdrawerlayout.addDrawerListener(mactiontoggle);
+        mactiontoggle.syncState();
+       getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        mnavigationview.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
+            @Override
+            public boolean onNavigationItemSelected(MenuItem item) {
+                switch(item.getItemId())
+                {
+                    //Logout Clicked
+                    case R.id.logout: toast.showmessage(getApplicationContext(),"Logout Clicked");
+                        SharedPreferences preferences = getSharedPreferences(mypreference,
+                                Context.MODE_PRIVATE);
 
+                        SharedPreferences.Editor edt = preferences.edit();
+                        edt.putBoolean("isloggedin",false);
+                        edt.apply();
+                        edt.commit();
+                        Intent i1=new Intent(getApplicationContext(),MainActivity.class);
+                        startActivity(i1);
+                        break;
+                    case R.id.profile:
+
+                        Intent i2=new Intent(getApplicationContext(),ViewProfileActivity.class);
+                        startActivity(i2);
+                        break;
+
+                    case R.id.ridehistory:
+
+                        Intent i3=new Intent(getApplicationContext(),RideHistoryActivity.class);
+                        startActivity(i3);
+                        break;
+                }
+                return false;
+            }
+        });
         mestimateButton.setEnabled(false);
 
     }
 
+@Override
+public boolean onOptionsItemSelected(MenuItem item)
+{
+    if(mactiontoggle.onOptionsItemSelected(item)){
+
+        return true;
+    }
+    return super.onOptionsItemSelected(item);
+
+}
+
+
 
     private void toCallTimer() {
-        final String status="available";
-        final long period =30000;
-        final Handler handler = new Handler();
-        handler.postDelayed(new Runnable() {
+
+        final long period =10000;
+       // t.scheduleAtFixedRate(new TimeDisplayTimerTask(), 0, period);
+      final  Timer t1=new Timer();
+//        if(TimeCounter==10 || accepted_status.equals("1")) {
+//            Log.d("toCallTimer","Not Accepted");
+//            Intent i =new Intent(this,Activity1.class);
+//            startActivity(i);
+//
+//             return;
+//            }
+
+        t1.scheduleAtFixedRate(new TimerTask() {
+            int I=10;
             @Override
             public void run() {
-                String status="available";
-             //   new getdriverslocation().execute(status);
+                if(TimeCounter==I)
+                {
+                   t1.cancel();
+                    return;
+                }
+                if(isNetworkConnected()) {
+                    String status = "available";
+                    if(accepted_status.equals("0")){ new getridestatus().execute();}
+                    Log.d("timer status",accepted_status);
+                    if(accepted_status.equals("1")){ Log.d("In if timer status",accepted_status);
+                       t1.cancel();
+                         return; }
+                    TimeCounter++;
+                    Log.d("timer status",String.valueOf(TimeCounter));
+                }
+
+
+
             }
-        }, period);
+        },0,period);
+        Log.d("TIMER RETURN","EGE");
+
 
     }
+    class TimeDisplayTimerTask extends TimerTask {
+
+        int I=10;
+        @Override
+        public void run() {
+            // run on another thread
+            mHandler.post(new Runnable() {
+
+                @Override
+                public void run() {
+                    if(TimeCounter==I)
+                    {
+                        Log.d("TimeCounter","Not Accepted");
+//                        if(timer_status==true) {
+//                            toast.showmessage(getApplicationContext(), "Not Accepted");
+//                            TimeCounter = 0;
+//                            timer_status=false;
+//                            // t.cancel();
+//                        }
+                        t.cancel();
+                      return;
+                    }
+                    if(isNetworkConnected()) {
+                        String status = "available";
+                        if(accepted_status.equals("0")){ new getridestatus().execute();  }
+                        Log.d("timer status",accepted_status);
+
+                        if(accepted_status.equals("1")){ Log.d("In if timer status",accepted_status);t.cancel();
+                             return;
+                        }
+                        TimeCounter++;
+                        Log.d("timer status",String.valueOf(TimeCounter));
+                    }
+                }
+
+            });
+        }
+
+
+    }
+
+    private boolean isNetworkConnected() {
+        ConnectivityManager cm = (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
+
+        return cm.getActiveNetworkInfo() != null;
+    }
+
+
     @Override
     protected void onResume() {
         super.onResume();
@@ -148,10 +294,10 @@ public class TrialMapsActivity extends FragmentActivity implements OnMapReadyCal
     protected void onDestroy() {
         super.onDestroy();
         Log.d("In Trail Maps Activity","Service");
-       // if(broadcastReceiver != null){
-       //unregisterReceiver(broadcastReceiver);
-         //   stopService(serviceintent);
-      //  }
+    //  if(broadcastReceiver != null){
+      // unregisterReceiver(broadcastReceiver);
+     //stopService(serviceintent);
+     //}
     }
 
 
@@ -242,23 +388,31 @@ public class TrialMapsActivity extends FragmentActivity implements OnMapReadyCal
                  SharedPreferences prefs = getSharedPreferences(mypreference,
                          Context.MODE_PRIVATE);
                  String useremail=prefs.getString("email","");
-                 new sendPushNotification().execute(useremail,"IIITD",location);
+//                 new checkjourneystatus().execute(useremail);
+//                 Log.d("JOURNEY STATUS",journey_status);
+//                if(journey_status.equals("started"))
+//                 {
+//                     new AlertDialog.Builder(TrialMapsActivity.this)
+//                             .setTitle("You Cannot Make a Ride Request")
+//                             .setMessage("You are already on a ride.Try Again Later")
+//                             .show();
+//                     return;
+//                 }
 
-                 }
+                 new sendPushNotification().execute(useremail,"IIITD",location);
+                 Intent i=new Intent(this,Activity1.class);
+                 startActivity(i);
+
+                }
                 catch(IndexOutOfBoundsException e)
                 {
                     Toast.makeText(this,"Please enter a Valid Location",Toast.LENGTH_SHORT).show();
                 }
-
-
-
-
-
-               // distanceBetween(28.5473,77.2732,latitude,longitude);
-
-              // float d1= distFrom(28.5473,77.2732,latitude,longitude);
-               // Toast.makeText(this,"D1"+d1,Toast.LENGTH_SHORT).show();
-            }
+             catch (NullPointerException e)
+             {
+         Toast.makeText(this,"Please enter  Valid Location",Toast.LENGTH_SHORT).show();
+}
+                }
             else
             {
                 Log.d("Service:","Service Not Present");
@@ -455,6 +609,285 @@ public class TrialMapsActivity extends FragmentActivity implements OnMapReadyCal
             pDialog.dismiss();
             Log.d("POST PUSH",response);
 
+        }
+
+    }
+
+    class getridestatus extends AsyncTask<String, String, String> {
+
+        /**
+         Show Progress Dialog
+         * */
+        private String authstatus="";
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            pDialog1 = new ProgressDialog(TrialMapsActivity.this);
+            pDialog1.setMessage("Waiting...");
+            pDialog1.setIndeterminate(false);
+            pDialog1.setCancelable(true);
+            pDialog1.show();
+        }
+
+        /**
+         * Creating account
+         * */
+        protected String doInBackground(String... args) {
+
+
+
+            SharedPreferences prefs = getSharedPreferences(mypreference,
+                    Context.MODE_PRIVATE);
+            String useremail=prefs.getString("email","");
+            // Building Parameters
+            List<NameValuePair> params = new ArrayList<NameValuePair>();
+
+            params.add(new BasicNameValuePair("email", useremail));
+
+            URL url = null;
+            HttpURLConnection conn = null;
+            try {
+                url = new URL(url_get_ridestatus);
+                Log.d("url", String.valueOf(url));
+                conn = (java.net.HttpURLConnection) url.openConnection();
+                conn.setReadTimeout(10000);
+                conn.setConnectTimeout(15000);
+                conn.setRequestMethod("POST");
+                conn.setDoInput(true);
+                conn.setDoOutput(true);
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+
+            OutputStream os = null;
+            try {
+                os = conn.getOutputStream();
+                BufferedWriter writer = new BufferedWriter(
+                        new OutputStreamWriter(os, "UTF-8"));
+                writer.write(getQuery(params));
+                writer.flush();
+                writer.close();
+                os.close();
+
+                conn.connect();
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+
+            int responseCode = 0;
+
+            String json_string ="";
+            try {
+                responseCode = conn.getResponseCode();
+                if (responseCode == HttpsURLConnection.HTTP_OK) {
+                    String line;
+                    BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+                    while ((line = br.readLine()) != null) {
+                        json_string += line;
+
+                    }
+                    Log.d("ride response", json_string);
+
+
+                } else {
+                    json_string = "";
+
+                }
+
+                return json_string;
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return json_string;
+        }
+        private String getQuery(List<NameValuePair> params) throws UnsupportedEncodingException
+        {
+            StringBuilder result = new StringBuilder();
+            boolean first = true;
+
+            for (NameValuePair pair : params)
+            {
+                if (first)
+                    first = false;
+                else
+                    result.append("&");
+
+                result.append(URLEncoder.encode(pair.getName(), "UTF-8"));
+                result.append("=");
+                result.append(URLEncoder.encode(pair.getValue(), "UTF-8"));
+            }
+            Log.d("GET QUERY",result.toString());
+            return result.toString();
+        }
+        /**
+         * After completing background task Dismiss the progress dialog
+         * **/
+        protected void onPostExecute(String response) {
+            // dismiss the dialog once done
+
+            Log.d("POST PUSH",response);
+            JSONObject jsonresponse = null;
+            try {
+                jsonresponse =new JSONObject(response);
+                if(jsonresponse.length()!=0)
+                {
+                   accepted_status=jsonresponse.getString("accepted");
+                    String accepted_demail=jsonresponse.getString("by_email");
+                    String accepted_name=jsonresponse.getString("by_name");
+                    String accepted_phone=jsonresponse.getString("by_mobile");
+                    new AlertDialog.Builder(TrialMapsActivity.this)
+                            .setTitle("Ride Accepted")
+                            .setMessage("Your Rickshaw is on your way"+"\n"+"Driver name:"+accepted_name+"\n"+"Mobile:"+accepted_phone)
+                            .show();
+                }
+
+
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            pDialog1.dismiss();
+        }
+
+    }
+
+    class checkjourneystatus extends AsyncTask<String, String, String> {
+
+        /**
+         Show Progress Dialog
+         * */
+        private String authstatus="";
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            pDialog2 = new ProgressDialog(TrialMapsActivity.this);
+            pDialog2.setMessage("Waiting...");
+            pDialog2.setIndeterminate(false);
+            pDialog2.setCancelable(true);
+            pDialog2.show();
+        }
+
+        /**
+         * Creating account
+         * */
+        protected String doInBackground(String... args) {
+
+
+
+            SharedPreferences prefs = getSharedPreferences(mypreference,
+                    Context.MODE_PRIVATE);
+            String useremail=prefs.getString("email","");
+            // Building Parameters
+            List<NameValuePair> params = new ArrayList<NameValuePair>();
+
+            params.add(new BasicNameValuePair("email", useremail));
+
+            URL url = null;
+            HttpURLConnection conn = null;
+            try {
+                url = new URL(url_check_journeystatus);
+                Log.d("url", String.valueOf(url));
+                conn = (java.net.HttpURLConnection) url.openConnection();
+                conn.setReadTimeout(10000);
+                conn.setConnectTimeout(15000);
+                conn.setRequestMethod("POST");
+                conn.setDoInput(true);
+                conn.setDoOutput(true);
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+
+            OutputStream os = null;
+            try {
+                os = conn.getOutputStream();
+                BufferedWriter writer = new BufferedWriter(
+                        new OutputStreamWriter(os, "UTF-8"));
+                writer.write(getQuery(params));
+                writer.flush();
+                writer.close();
+                os.close();
+
+                conn.connect();
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+
+            int responseCode = 0;
+
+            String json_string ="";
+            try {
+                responseCode = conn.getResponseCode();
+                if (responseCode == HttpsURLConnection.HTTP_OK) {
+                    String line;
+                    BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+                    while ((line = br.readLine()) != null) {
+                        json_string += line;
+
+                    }
+                    Log.d("ride response", json_string);
+
+
+                } else {
+                    json_string = "";
+
+                }
+
+                return json_string;
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return json_string;
+        }
+        private String getQuery(List<NameValuePair> params) throws UnsupportedEncodingException
+        {
+            StringBuilder result = new StringBuilder();
+            boolean first = true;
+
+            for (NameValuePair pair : params)
+            {
+                if (first)
+                    first = false;
+                else
+                    result.append("&");
+
+                result.append(URLEncoder.encode(pair.getName(), "UTF-8"));
+                result.append("=");
+                result.append(URLEncoder.encode(pair.getValue(), "UTF-8"));
+            }
+            Log.d("GET QUERY",result.toString());
+            return result.toString();
+        }
+        /**
+         * After completing background task Dismiss the progress dialog
+         * **/
+        protected void onPostExecute(String response) {
+            // dismiss the dialog once done
+
+            Log.d("POST PUSH",response);
+            JSONObject jsonresponse = null;
+            try {
+                jsonresponse =new JSONObject(response);
+                if(jsonresponse.length()!=0)
+                {
+                    journey_status=jsonresponse.getString("status");
+
+
+                }
+
+
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            pDialog2.dismiss();
         }
 
     }

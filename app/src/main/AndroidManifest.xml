@@ -11,22 +11,17 @@
     -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
     <application
         android:allowBackup="true"
-        android:icon="@drawable/rick"
+        android:icon="@drawable/rickshaw"
         android:label="MyRickshaw"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
             android:name=".MainActivity"
-            android:configChanges="orientation|screenSize">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
+            android:configChanges="orientation|screenSize" />
         <activity
             android:name=".RegisterActivity"
             android:configChanges="orientation|screenSize" />
@@ -57,6 +52,24 @@
             android:enabled="true"
             android:exported="true" />
 
+        <activity android:name=".Activity1" />
+        <activity
+            android:name=".SplashActivity"
+            android:theme="@android:style/Theme.Holo.Light.NoActionBar.Fullscreen"
+            android:configChanges="orientation|screenSize">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".ViewProfileActivity"
+            android:configChanges="orientation|screenSize"
+            android:parentActivityName=".TrialMapsActivity" />
+        <activity android:name=".RideHistoryActivity"
+            android:parentActivityName=".TrialMapsActivity"
+            android:configChanges="orientation|screenSize"></activity>
     </application>
 
 </manifest>

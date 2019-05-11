@@ -45,7 +45,7 @@ import java.util.List;
 
 import javax.net.ssl.HttpsURLConnection;
 
-
+//Activity to create a new user
 public class RegisterActivity extends AppCompatActivity implements View.OnClickListener {
 
     EditText mFullName;
@@ -79,39 +79,12 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
         mPassword=(EditText)findViewById(R.id.RegPasswordEditText);
         mCPassword=(EditText)findViewById(R.id.RegConfirmPasswordEditText);
         mPhoneNo=(EditText)findViewById(R.id.RegPhonenoEditText);
-        mLicenceNo=(EditText)findViewById(R.id.RegLicenceEditText);
-        mspinner=(Spinner)findViewById(R.id.RegUserTypeSpinner);
+
         mRegister=(Button)findViewById(R.id.registeraccButton);
         mLogin=(Button)findViewById(R.id.RegAlloginButton);
         mRegister.setOnClickListener(this);
         mLogin.setOnClickListener(this);
-        ArrayAdapter adapter=ArrayAdapter.createFromResource(this,R.array.usertype,android.R.layout.simple_spinner_item);
-        mspinner.setAdapter(adapter);
-        mspinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener(){
 
-            @Override
-            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                TextView myText=(TextView)view;
-               // Toast.makeText(this,"You have Selected "+myText.getText(),Toast.LENGTH_SHORT).show();
-                Log.d("Spinner",myText.getText().toString());
-                String type=myText.getText().toString();
-                if(type.equals("Driver"))
-                {
-               mLicenceNo.setVisibility(View.VISIBLE);
-                    isdriver=true;
-                }
-                if(type.equals("User"))
-                {
-                    mLicenceNo.setVisibility(View.INVISIBLE);
-                    isdriver=false;
-                }
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> adapterView) {
-
-            }
-        });
     }
 
     boolean isEmailValid(CharSequence email) {
@@ -130,11 +103,7 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
                 String password = mPassword.getText().toString();
                 String cpassword=mCPassword.getText().toString();
                 String phone=mPhoneNo.getText().toString();
-                String licence=null;
-                if(isdriver==true)
-                {
-                    licence=mLicenceNo.getText().toString();
-                }
+
                 if(fullname.equals("")||email.equals("")||password.equals("")||cpassword.equals("")||phone.equals(""))
                 {
                     if(isdriver && mLicenceNo.equals("")) {toast.showmessage(getApplicationContext(),"Please Fill All The Fields");break;}
@@ -158,7 +127,7 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
                     break;
                 }
                 Log.d("In regaccButton","ONclick");
-                new CreateNewAccount().execute(fullname,email,password,phone,licence);
+                new CreateNewAccount().execute(fullname,email,password,phone);
                 break;
             case R.id.RegAlloginButton:Intent back=new Intent(getApplicationContext(),MainActivity.class);
                 startActivity(back);
@@ -193,7 +162,7 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
             String email = args[1];
             String password = args[2];
             String phone=args[3];
-            String license=args[4];
+
             // Building Parameters
             List<NameValuePair> params = new ArrayList<NameValuePair>();
             params.add(new BasicNameValuePair("fullname", fullname));
@@ -204,15 +173,10 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
             URL url = null;
             HttpURLConnection conn=null;
             try {
-                if(license!=null && isdriver==true)
-                {
 
-                    params.add(new BasicNameValuePair("license",license));
-                    url=new URL(url_create_driveraccount);
-                }
-               else {
+
                     url = new URL(url_create_account);
-                }
+
                 Log.d("url", String.valueOf(url));
                  conn= (java.net.HttpURLConnection ) url.openConnection();
                 conn.setReadTimeout(10000);
@@ -226,7 +190,7 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
                 e.printStackTrace();
             }
 
-            String json_string = "Helo.;";
+            String json_string = "";
             OutputStream os = null;
             try {
                 os = conn.getOutputStream();
@@ -252,21 +216,7 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
                     while ((line = br.readLine()) != null) {
                         json_string += line;
                     }
-                /*  jsonresponse=new JSONObject(json_string);
-                    Log.d("json Response in try", jsonresponse.toString());
 
-                    authstatus=jsonresponse.getString("success");
-                    Log.d("AuthStatus Response", authstatus);
-                    if(authstatus.equals("0"))
-                    {
-                        Log.d("User Info","INVALID DETAILS");
-                    }
-                    else
-                    {
-                        Log.d("User Info","VALID DETAILS");
-                        Intent user=new Intent(getApplicationContext(),MainActivity.class);
-                        startActivity(user);
-                    }*/
                 }
                 else {
                     json_string="";
@@ -283,7 +233,7 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
 
             Log.d("Create Response", json_string);
 
-            return null;
+            return json_string;
         }
         private String getQuery(List<NameValuePair> params) throws UnsupportedEncodingException
         {
@@ -307,14 +257,23 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
         /**
          * After completing background task Dismiss the progress dialog
          * **/
-        protected void onPostExecute(String file_url) {
+        protected void onPostExecute(String response) {
             // dismiss the dialog once done
             pDialog.dismiss();
-          /*  if (authstatus.equals("0")) {
-                Log.d("User Info","INVALID DETAILS");
-                toast.showmessage(getApplicationContext(), "Email id Already Present");
+            try {
+                JSONObject json = new JSONObject(response);
+                String success = json.getString("success");
+                Log.d("SUCCESS",success);
+                if (success.equals("0")) {
+                    Log.d("User Info", "INVALID DETAILS");
+                    toast.showmessage(getApplicationContext(), "Email id Already Present");
+                } else {
+                    toast.showmessage(getApplicationContext(), "Details Saved Successfully");
+                }
+
+            } catch (JSONException e) {
+                e.printStackTrace();
             }
-*/
         }
 
     }

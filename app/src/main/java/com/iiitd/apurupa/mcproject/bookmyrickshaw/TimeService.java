@@ -2,7 +2,10 @@ package com.iiitd.apurupa.mcproject.bookmyrickshaw;
 
 import android.app.ProgressDialog;
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.IBinder;
@@ -26,9 +29,11 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
+import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Timer;
@@ -48,6 +53,7 @@ public class TimeService extends Service {
     private static String url_get_driverlocation = "http://192.168.58.165/mc/available.php";
     public ArrayList<String> longitudelist=new ArrayList<String>();
     public ArrayList<String> latitudelist=new ArrayList<String>();
+    public boolean flag;
     @Override
     public IBinder onBind(Intent intent) {
         return null;
@@ -65,6 +71,35 @@ public class TimeService extends Service {
         // schedule task
         mTimer.scheduleAtFixedRate(new TimeDisplayTimerTask(), 0, NOTIFY_INTERVAL);
     }
+      private boolean isNetworkConnected() {
+        ConnectivityManager cm = (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
+
+        return cm.getActiveNetworkInfo() != null;
+    }
+
+    static public boolean isURLReachable(Context context) {
+        ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo netInfo = cm.getActiveNetworkInfo();
+        if (netInfo != null && netInfo.isConnected()) {
+            try {
+                URL url = new URL("http://192.168.58.165");   // Change to "http://google.com" for www  test.
+                HttpURLConnection urlc = (HttpURLConnection) url.openConnection();
+                urlc.setConnectTimeout(10 * 1000);          // 10 s.
+                urlc.connect();
+                if (urlc.getResponseCode() == 200) {        // 200 = "OK" code (http connection is fine).
+                    Log.wtf("Connection", "Success !");
+                    return true;
+                } else {
+                    return false;
+                }
+            } catch (MalformedURLException e1) {
+                return false;
+            } catch (IOException e) {
+                return false;
+            }
+        }
+        return false;
+    }
 
     class TimeDisplayTimerTask extends TimerTask {
 
@@ -76,12 +111,14 @@ public class TimeService extends Service {
                 @Override
                 public void run() {
 
-                    String status="available";
-                    new getdriverslocation().execute(status);
-                    Intent I = new Intent("location_update");
-                    I.putStringArrayListExtra("longitude",longitudelist);
-                    I.putStringArrayListExtra("latitude",latitudelist);
-                    sendBroadcast(I);
+                        if (isNetworkConnected() ) {
+                            String status = "available";
+                            new getdriverslocation().execute(status);
+                            Intent I = new Intent("location_update");
+                            I.putStringArrayListExtra("longitude", longitudelist);
+                            I.putStringArrayListExtra("latitude", latitudelist);
+                            sendBroadcast(I);
+                        }
 
                 }
 
@@ -90,6 +127,28 @@ public class TimeService extends Service {
 
 
     }
+
+    private boolean checkserverconnectivity() {
+
+        Thread thread = new Thread(new Runnable() {
+
+            @Override
+            public void run() {
+                try  {
+                    //Your code goes here
+                flag= isURLReachable(getApplicationContext());
+                    Log.d("SERVER",String.valueOf(flag));
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+
+        thread.start();
+        Log.d("SERVER2",String.valueOf(flag));
+        return flag;
+    }
+
     class getdriverslocation extends AsyncTask<String, String, String> {
 
         /**

@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <TextView
+        android:id="@+id/item_date"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_weight="0.00"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:gravity="center"
+        android:background="#FFE0B2"
+        />
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:text="Pickup Location"/>
+    <TextView
+        android:id="@+id/item_pickup"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_weight="0.00"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:gravity="center"
+        android:background="#FFE0B2"
+        />
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:text="Drop Location"/>
+    <TextView
+        android:id="@+id/item_dest"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_weight="0.00"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:gravity="center"
+        android:background="#FFE0B2"
+        />
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:text="Driver Name"/>
+    <TextView
+        android:id="@+id/item_driver"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_weight="0.00"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:gravity="center"
+        android:background="#FFE0B2"
+        />
+</LinearLayout>
